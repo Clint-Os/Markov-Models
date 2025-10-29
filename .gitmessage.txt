@@ -1,0 +1,25 @@
+# ============================================
+# Commit Message Template for Markov Models Project
+# ============================================
+
+# Format:
+# <action>(<scope>): <short summary>
+#
+# Example:
+# simulate(data): generate mHMM reference dataset (100 subjects, 60 weeks)
+#
+# Optional extended description below (1–3 lines)
+
+# Actions (verbs):
+#   add        → new notebook, dataset, or script
+#   simulate   → generate synthetic data or state sequences
+#   estimate   → parameter estimation, MLE, Bayesian fitting
+#   analyze    → post-hoc analyses, visualizations, diagnostics
+#   update     → tweak parameters or adjust existing code
+#   refactor   → reorganize, rename, or clean up code
+#   docs       → update documentation or markdown
+#   fix        → correct a bug or computation issue
+
+# Scopes:
+#   notebook, data, model, results, env, docs, etc.
+
