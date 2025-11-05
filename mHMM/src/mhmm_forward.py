@@ -1,5 +1,9 @@
 import numpy as np
 from mHMM.utils.viterbi_utils import viterbi, EPS
+from mHMM.utils.forward_utils import forward_loglik_subject
+from mHMM.utils.sampling_utils import sample_g_matrix_em_params
+from mHMM.utils.math_utils import logsumexp_arr
+from mHMM.src.emissions import EmissionModel
 
 def forward_algorithm(obs_seq, times, init_probs, trans_mat, emission_model, g):
     """
@@ -33,3 +37,30 @@ def forward_algorithm(obs_seq, times, init_probs, trans_mat, emission_model, g):
         logL += np.log(scale + EPS)
 
     return logL #return total log likelihood 
+
+def approx_subject_log_marginal(obs, times, init_probs, trans_mat, em_params, K=30, rng_seed=None):
+    """
+    Approximate marginal log-likelihood for one subject
+    by Monte Carlo integration over random effects g.
+    """
+    em = EmissionModel(**em_params)
+    x2_params = {k: em_params[k] for k in ['x2_FEV1R','x2_FEV1E','x2_PROR','x2_PROE']}
+    gs = sample_g_matrix_em_params(K, rng_seed, x2_params)
+
+    logls = [forward_loglik_subject(obs, times, init_probs, trans_mat, em, g) for g in gs]
+    return logsumexp_arr(np.array(logls)) - np.log(K) 
+
+def subject_loglik_mc(obs, times, init_probs, trans_mat, em_params, K=200, rng_seed=None):
+    """
+    Monte Carlo approximation of marginal log-likelihood for one subject
+    (same idea as approx_subject_log_marginal, but supports larger K).
+    """
+    em = EmissionModel(**em_params)
+    x2_params = {k: em_params[k] for k in ['x2_FEV1R', 'x2_FEV1E', 'x2_PROR', 'x2_PROE']}
+    gs = sample_g_matrix_em_params(K, rng_seed, x2_params)
+
+    logls = np.array([
+        forward_loglik_subject(obs, times, init_probs, trans_mat, em, g)
+        for g in gs
+    ])
+    return logsumexp_arr(logls) - np.log(K) 
