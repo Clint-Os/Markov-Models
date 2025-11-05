@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from mHMM.models.emissions import EmissionModel
-from mHMM.models.transitions import TransitionModel
+from mHMM.src.emissions import EmissionModel
+from mHMM.src.transitions import TransitionModel
 from numpy.random import SeedSequence, default_rng
 import time 
 
