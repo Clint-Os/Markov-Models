@@ -2,8 +2,8 @@ import numpy as np
 EPS = 1e-12
 
 
-def logisitic(x):
-    """Logisitic transformation"""
+def logistic(x):
+    """Logistic transformation"""
     return 1 / (1 + np.exp(-x))
 
 def logit(p):  #logit is the inverse of logistic

@@ -1,5 +1,5 @@
 import numpy as np
-from mHMM.utils.viterbi_utils import logistic, logit
+from utils.viterbi_utils import logistic, logit
 
 class TransitionModel:
 
