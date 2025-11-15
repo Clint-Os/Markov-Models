@@ -6,9 +6,16 @@ from numpy.random import SeedSequence, default_rng
 import time 
 
 def rng_from_seed(seed):
-    """Return a np generator deterministically from seed (int or None)"""
-    ss = SeedSequence(seed if seed is not None else int(time.time()*1e6) & 0xFFFFFFFF) # Use default random generator if none provided
-    return default_rng  
+    """
+    Return a dedicated NumPy Generator seeded reproducibly.
+    """
+    if seed is None:
+        # If no seed provided, fall back to a time-based seed.
+        seed = int(time.time() * 1e6) & 0xFFFFFFFF
+
+    ss = SeedSequence(seed)
+    return default_rng(ss)
+ 
 def simulate_reference_dataset(seed, N_subj=100, T_weeks =60, init_probs=(0.9, 0.1),
                                trans_params=None, em_params=None): 
     """Simulates a full dataset according to the paper's ref scenario. Return
