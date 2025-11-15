@@ -10,3 +10,4 @@ __pycache__/
 *-checkpoint.py 
 data/*
 !data/.gitkeep 
+.DS_Store 
