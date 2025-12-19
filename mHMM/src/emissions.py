@@ -18,7 +18,7 @@ class EmissionModel:
     """
 
     def __init__(self,
-                 hFEV1R, hFEV1E,
+                 mu_logFEV1, hFEV1E,
                  x2_FEV1R=0.03, x2_FEV1E=0.03,
                  hPROR=2.5, hPROE=0.5,
                  x2_PROR=0.09, x2_PROE=0.09,
@@ -27,7 +27,7 @@ class EmissionModel:
                  PE=0.2, PHL=10.0):
 
         # population mode params
-        self.hFEV1R = float(hFEV1R)
+        self.mu_logFEV1 = float(mu_logFEV1) 
         self.hFEV1E = float(hFEV1E)
         self.hPROR = float(hPROR)
         self.hPROE = float(hPROE)
@@ -43,8 +43,8 @@ class EmissionModel:
         self.r2_PRO = float(r2_PRO)
 
         # correlations per state
-        self.qR = float(qR)
-        self.qE = float(qE)
+        self.qR = float(np.clip(qR, -0.999, 0.999))
+        self.qE = float(np.clip(qE, -0.999, 0.999))
 
         # placebo effect params for PRO
         self.PE = float(PE)
@@ -52,7 +52,15 @@ class EmissionModel:
 
     def sample_individual_effects(self, rng=None):
         """Sample one set of individual random effects g* (mean 0, var = x2_*)"""
-        rng = np.random.default_rng(rng)
+        if rng is None:
+            rng = np.random.default_rng()
+        elif isinstance(rng, (int, np.integer)):
+            rng = np.random.default_rng(int(rng)) 
+        elif isinstance (rng, np.random.Generator):
+            pass 
+        else:
+            raise TypeError(f"Invalid rng argument: {type(rng)}")
+        
         g = {
             "gFEV1R": rng.normal(0.0, np.sqrt(self.x2_FEV1R)),
             "gFEV1E": rng.normal(0.0, np.sqrt(self.x2_FEV1E)),
@@ -65,12 +73,12 @@ class EmissionModel:
         """
         Compute individuals's latent FEV1 for given state as in Eq. 1 & 2
         """
-        FEV1_R = self.hFEV1R * np.exp(g["gFEV1R"])
-        if state == 0:
-            return FEV1_R
+        
+        if state == 0: #R
+            return self.mu_logFEV1 + g["gFEV1R"] 
         else:
             #rem for eq 2: FEV1_E = FEV1_R - hFEV1E * exp(g["gFEV1E"])
-            return FEV1_R - self.hFEV1E * np.exp(g["gFEV1E"]) 
+            return self.mu_logFEV1 + self.hFEV1E + g["gFEV1E"] 
         
     def individual_pro(self, g, time, state):
         """
@@ -94,7 +102,14 @@ class EmissionModel:
         q = self.qR if state ==0 else self.qE
         covxy = q * np.sqrt(self.r2_FEV1 * self.r2_PRO)
         cov = np.array([[self.r2_FEV1, covxy],
-                        [covxy, self.r2_PRO]])  #2x2 covariance matrix
+                        [covxy, self.r2_PRO]], dtype=float)  #2x2 covariance matrix
+        cov = (cov + cov.T)/2.0 #for numeric safety
+
+        eig = np.linalg.eigvalsh(cov)
+        if eig.min() <= 0:
+            jitter =max(1e-8, 1e-6 * abs(eig.min()))
+            cov += np.eye(2) * jitter 
+                        
         return cov
     
 
@@ -108,6 +123,8 @@ class EmissionModel:
         mu = np.array([mu_FEV1, mu_PRO])  #mean vector
 
         cov = self.emission_cov(state)  #covariance matrix
+        cov_safe = cov + np.eye(2) * EPS
 
-        logpdf = multivariate_normal.logpdf(y, mean=mu, cov=cov + np.eye(2)*EPS)
+        logpdf = multivariate_normal.logpdf(y, mean=mu, cov=cov_safe) 
         return logpdf  
+

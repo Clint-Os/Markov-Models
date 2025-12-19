@@ -1,6 +1,6 @@
 
 import numpy as np
-from mHMM.utils.math_utils import logsumexp_arr 
+from utils.math_utils import logsumexp_arr 
 EPS = 1e-12
 
 def forward_loglik_subject(obs, times, init_probs, trans_mat, emission_model, g):
