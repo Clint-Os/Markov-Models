@@ -6,7 +6,7 @@ class TransitionModel:
     """
     Implement the transition probabilities between Reference and Exarcebation states."""
     
-    def __init__(self, hpRE, gpRE, hpER, gpER, trt=0, slp=0):
+    def __init__(self, logit_hpRE, gpRE, logit_hpER, gpER, trt=0, slp=0):
 
         """
         Initialize transition model with parameters:
@@ -16,9 +16,9 @@ class TransitionModel:
         gpER: IIV random effect variance for E->R
         trt, slp: treatment/slope effect covariates
         """
-        self.hpRE = float(hpRE)
+        self.hpRE = float(logit_hpRE)
         self.gpRE = float(gpRE)
-        self.hpER = float(hpER)
+        self.hpER = float(logit_hpER)
         self.gpER = float(gpER)
         self.trt = float(trt)
         self.slp = float(slp)

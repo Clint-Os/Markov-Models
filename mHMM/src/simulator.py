@@ -14,7 +14,7 @@ def rng_from_seed(seed):
         seed = int(time.time() * 1e6) & 0xFFFFFFFF
 
     ss = SeedSequence(seed)
-    return default_rng(ss)
+    return default_rng(ss) 
  
 def simulate_reference_dataset(seed, N_subj=100, T_weeks =60, init_probs=(0.9, 0.1),
                                trans_params=None, em_params=None): 

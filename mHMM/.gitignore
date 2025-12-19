@@ -9,5 +9,8 @@ __pycache__/
 .ipynb_checkpoints 
 *-checkpoint.py 
 data/*
+../data/ 
 !data/.gitkeep 
 .DS_Store 
+#Logs
+*.log 
