@@ -12,6 +12,5 @@ data/*
 ../data/ 
 !data/.gitkeep 
 .DS_Store 
-mHMM/notebooks/.../data/results/SSE/sse_run_20251115_224738.log
-mHMM/notebooks/.../data/results/SSE/sse_run_20251115_223930.log
-data/results/SSE/sse_run_20251115_225826.log
+#Logs
+*.log 
